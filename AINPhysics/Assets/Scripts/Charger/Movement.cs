@@ -12,6 +12,7 @@ public class Movement : MonoBehaviour
 
 
     public float PatrolRange;
+    public float chargerSpeed;
 
 
     public bool foundPlayer;
@@ -28,7 +29,7 @@ public class Movement : MonoBehaviour
 
         chargerAgent = GetComponent<NavMeshAgent>();
 
-        //chargerSelf
+       // chargerSelf = GetComponent<GameObject>();
 
 
     }
@@ -53,11 +54,12 @@ public class Movement : MonoBehaviour
             }
 
         }
-        else if (foundPlayer == true && chargerAgent.remainingDistance <= chargerAgent.stoppingDistance)
+        else if (foundPlayer == true)
         {
 
 
             chargerAgent.SetDestination(playerDestination);
+
 
 
         }
@@ -68,14 +70,11 @@ public class Movement : MonoBehaviour
     bool RandomPoint(Vector3 center, float PatrolRange, out Vector3 result)
     {
 
-
-
-        Vector3 randomPoint = center + Random.insideUnitSphere * PatrolRange; //random point in a sphere 
+        Vector3 randomPoint = center + Random.insideUnitSphere * PatrolRange; 
         NavMeshHit hit;
         if (NavMesh.SamplePosition(randomPoint, out hit, 1.0f, NavMesh.AllAreas)) 
         {
-            //the 1.0f is the max distance from the random point to a point on the navmesh, might want to increase if range is big
-            //or add a for loop like in the documentation
+            
             result = hit.position;
             return true;
         }
@@ -95,18 +94,38 @@ public class Movement : MonoBehaviour
 
             playerDestination = other.transform.position;
 
+            Debug.Log("Seen Player");
+
+            foundPlayer = true;
+
+            chargerSpeed = 10.0f;
+
+            chargerAgent.speed = chargerSpeed;
+
+           // chargerSelf.transform.LookAt(other.transform);
+
 
         }
 
 
     }
 
+    private void OnTriggerExit(Collider other)
+    {
+        
+        if(other.CompareTag("Player"))
+        {
+
+            foundPlayer = false;
+
+
+        }
 
 
 
 
 
 
-
+    }
 
 }
