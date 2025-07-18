@@ -1,11 +1,14 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 public class Movement : MonoBehaviour
 {
 
 
     public NavMeshAgent chargerAgent;
+
+    public GameObject chargerSelf;
 
 
     public float PatrolRange;
@@ -14,13 +17,18 @@ public class Movement : MonoBehaviour
     public bool foundPlayer;
 
 
+
+
     public Transform patrolCenter;
+    public Vector3 playerDestination;
 
 
     private void Start()
     {
 
         chargerAgent = GetComponent<NavMeshAgent>();
+
+        //chargerSelf
 
 
     }
@@ -40,8 +48,17 @@ public class Movement : MonoBehaviour
 
                 Debug.DrawRay(point, Vector3.up, Color.blue, 1.0f);
                 chargerAgent.SetDestination(point);
+                
 
             }
+
+        }
+        else if (foundPlayer == true && chargerAgent.remainingDistance <= chargerAgent.stoppingDistance)
+        {
+
+
+            chargerAgent.SetDestination(playerDestination);
+
 
         }
     }
@@ -55,7 +72,7 @@ public class Movement : MonoBehaviour
 
         Vector3 randomPoint = center + Random.insideUnitSphere * PatrolRange; //random point in a sphere 
         NavMeshHit hit;
-        if (NavMesh.SamplePosition(randomPoint, out hit, 1.0f, NavMesh.AllAreas)) //documentation: https://docs.unity3d.com/ScriptReference/AI.NavMesh.SamplePosition.html
+        if (NavMesh.SamplePosition(randomPoint, out hit, 1.0f, NavMesh.AllAreas)) 
         {
             //the 1.0f is the max distance from the random point to a point on the navmesh, might want to increase if range is big
             //or add a for loop like in the documentation
@@ -76,11 +93,10 @@ public class Movement : MonoBehaviour
         if(other.CompareTag("Player"))
         {
 
-
+            playerDestination = other.transform.position;
 
 
         }
-
 
 
     }
