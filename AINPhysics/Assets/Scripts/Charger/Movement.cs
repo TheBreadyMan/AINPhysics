@@ -9,16 +9,13 @@ public class Movement : MonoBehaviour
     public NavMeshAgent chargerAgent;
 
     public GameObject chargerSelf;
+    public GameObject playerBody;
 
 
     public float PatrolRange;
     public float chargerSpeed;
 
-
-    public bool foundPlayer;
-
-
-
+    public bool touchingPlayer;
 
     public Transform patrolCenter;
     public Vector3 playerDestination;
@@ -28,6 +25,8 @@ public class Movement : MonoBehaviour
     {
 
         chargerAgent = GetComponent<NavMeshAgent>();
+
+        playerBody = GameObject.Find("Player");
 
        // chargerSelf = GetComponent<GameObject>();
 
@@ -39,30 +38,44 @@ public class Movement : MonoBehaviour
     private void Update()
     {
 
-
-        if (foundPlayer == false && chargerAgent.remainingDistance <= chargerAgent.stoppingDistance)
+        if (touchingPlayer == false)
         {
-
-            Vector3 point;
-            if(RandomPoint(patrolCenter.position, PatrolRange, out point))
+            if (playerinFront() && chargerLineOfSight())
             {
 
-                Debug.DrawRay(point, Vector3.up, Color.blue, 1.0f);
-                chargerAgent.SetDestination(point);
-                
+
+                playerDestination = playerBody.transform.position;
+
+
+
+                chargerAgent.SetDestination(playerDestination);
 
             }
+            else
+            {
 
+                if (chargerAgent.remainingDistance <= chargerAgent.stoppingDistance)
+                {
+                    Vector3 point;
+                    if (RandomPoint(patrolCenter.position, PatrolRange, out point))
+                    {
+
+                        Debug.DrawRay(point, Vector3.up, Color.blue, 1.0f);
+                        chargerAgent.SetDestination(point);
+
+
+                    }
+                }
+
+
+            }
         }
-        else if (foundPlayer == true)
-        {
-
-
-            chargerAgent.SetDestination(playerDestination);
 
 
 
-        }
+            playerinFront();
+        chargerLineOfSight();
+
     }
 
 
@@ -85,43 +98,66 @@ public class Movement : MonoBehaviour
     }
 
 
+    bool playerinFront()
+    {
+
+        Vector3 directionofPlayer = transform.position - playerBody.transform.position;
+        float angle = Vector3.Angle(transform.forward, directionofPlayer);
+
+        if(Mathf.Abs(angle) > 90 && Mathf.Abs(angle) < 270)
+        {
+            Debug.DrawLine(transform.position, playerBody.transform.position, Color.red);
+            return true;
+        }
+        return false;
+
+    }
+
+    bool chargerLineOfSight()
+    {
+
+        RaycastHit _hit;
+        Vector3 directionOfPlayer =  playerBody.transform.position - transform.position;
+
+        if(Physics.Raycast(transform.position, directionOfPlayer, out _hit, 50000f))
+        {
+
+            if(_hit.transform.tag == "Player")
+            {
+
+                Debug.DrawLine(transform.position, playerBody.transform.position, Color.green);
+                return true;
+
+            }
+
+        }
+
+        return false;
+
+
+    }
+
+
 
     private void OnTriggerEnter(Collider other)
     {
-        
+
         if(other.CompareTag("Player"))
         {
 
-            playerDestination = other.transform.position;
 
-            Debug.Log("Seen Player");
-
-            foundPlayer = true;
-
-            chargerSpeed = 10.0f;
-
-            chargerAgent.speed = chargerSpeed;
-
-           // chargerSelf.transform.LookAt(other.transform);
 
 
         }
+
+        
 
 
     }
 
     private void OnTriggerExit(Collider other)
     {
-        
-        if(other.CompareTag("Player"))
-        {
-
-            foundPlayer = false;
-
-
-        }
-
-
+      
 
 
 
