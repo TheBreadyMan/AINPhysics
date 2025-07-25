@@ -145,7 +145,7 @@ public class Movement : MonoBehaviour
         if(other.CompareTag("Player"))
         {
 
-
+            touchingPlayer = true;
 
 
         }
@@ -157,8 +157,14 @@ public class Movement : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-      
 
+        if (other.CompareTag("Player"))
+        {
+
+            touchingPlayer = false;
+
+
+        }
 
 
 
